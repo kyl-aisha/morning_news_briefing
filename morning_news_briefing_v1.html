@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morning Briefing</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f9f8f5;
+      --surface: #ffffff;
+      --border: rgba(0,0,0,0.1);
+      --text-primary: #1a1a18;
+      --text-secondary: #6b6b66;
+      --text-tertiary: #9e9e99;
+      --accent: #1D9E75;
+      --accent-light: #e1f5ee;
+      --accent-text: #0f6e56;
+      --info-bg: #e6f1fb;
+      --info-text: #185fa5;
+      --danger: #a32d2d;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-pill: 999px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a18;
+        --surface: #232320;
+        --border: rgba(255,255,255,0.1);
+        --text-primary: #f0efe8;
+        --text-secondary: #9e9e99;
+        --text-tertiary: #6b6b66;
+        --accent-light: #04342c;
+        --accent-text: #5dcaa5;
+        --info-bg: #042c53;
+        --info-text: #85b7eb;
+      }
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 640px;
+    }
+
+    .masthead {
+      border-bottom: 1.5px solid var(--text-primary);
+      padding-bottom: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .masthead-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .masthead h1 {
+      font-family: 'Georgia', serif;
+      font-size: 28px;
+      font-weight: normal;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--accent-text);
+      background: var(--accent-light);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .dateline {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    .topic-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .chip {
+      padding: 5px 14px;
+      border-radius: var(--radius-pill);
+      border: 0.5px solid var(--border);
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      background: var(--surface);
+      color: var(--text-secondary);
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .chip:hover { border-color: var(--text-secondary); }
+
+    .chip.active {
+      background: var(--accent-light);
+      color: var(--accent-text);
+      border-color: transparent;
+      font-weight: bold;
+    }
+
+    #briefBtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 22px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--text-primary);
+      background: var(--text-primary);
+      color: var(--bg);
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    #briefBtn:hover { opacity: 0.85; }
+    #briefBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #output { margin-top: 2rem; }
+
+    .section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .section:last-of-type { border-bottom: none; }
+
+    .section-title {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+    }
+
+    .section-body {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-primary);
+    }
+
+    .timestamp {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 1.5rem;
+      letter-spacing: 0.04em;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 13px;
+      height: 13px;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error {
+      color: var(--danger);
+      font-size: 14px;
+      margin-top: 1rem;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="masthead">
+      <div class="masthead-top">
+        <h1>Morning Briefing</h1>
+        <span class="live-badge"><span class="dot"></span> Live news</span>
+      </div>
+      <p class="dateline" id="dateline"></p>
+    </div>
+
+    <div class="topic-row" id="chips">
+      <div class="chip active" data-topic="World news">World</div>
+      <div class="chip active" data-topic="Technology">Tech</div>
+      <div class="chip active" data-topic="Business & markets">Business</div>
+      <div class="chip" data-topic="Science">Science</div>
+      <div class="chip" data-topic="Sports">Sports</div>
+      <div class="chip" data-topic="Singapore & Asia">Singapore</div>
+    </div>
+
+    <button id="briefBtn" onclick="getBriefing()">
+      <span class="dot" style="background:white"></span> Get today's briefing
+    </button>
+
+    <div id="output"></div>
+  </div>
+
+  <script>
+    document.getElementById('dateline').textContent = new Date().toLocaleDateString('en-SG', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    }).toUpperCase();
+
+    document.querySelectorAll('.chip').forEach(c => {
+      c.addEventListener('click', () => c.classList.toggle('active'));
+    });
+
+    async function getBriefing() {
+      const btn = document.getElementById('briefBtn');
+      const out = document.getElementById('output');
+      const topics = [...document.querySelectorAll('.chip.active')].map(c => c.dataset.topic);
+      if (!topics.length) { out.innerHTML = '<p class="error">Please select at least one topic.</p>'; return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Fetching news...';
+      out.innerHTML = '';
+
+      const today = new Date().toLocaleDateString('en-SG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const prompt = `Today is ${today}. You are a news editor. Search the web for the latest news and write a concise morning briefing covering: ${topics.join(', ')}. For each topic, give 2-3 sentences summarizing the most important story. Use web search to find actual current news. Format your response as JSON only, like this (no markdown, no backticks, just raw JSON):
+{"sections":[{"title":"World news","body":"..."},{"title":"Technology","body":"..."}]}`;
+
+      try {
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 1000,
+            tools: [{ type: "web_search_20250305", name: "web_search" }],
+            messages: [{ role: "user", content: prompt }]
+          })
+        });
+        const data = await res.json();
+        const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+        const clean = text.replace(/```json|```/g, '').trim();
+        const parsed = JSON.parse(clean);
+        let html = '';
+        for (const s of parsed.sections) {
+          html += `<div class="section"><p class="section-title">${s.title}</p><p class="section-body">${s.body}</p></div>`;
+        }
+        html += `<p class="timestamp">Generated at ${new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' })}</p>`;
+        out.innerHTML = html;
+      } catch (e) {
+        out.innerHTML = '<p class="error">Could not load briefing. Please try again.</p>';
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<span class="dot" style="background:white"></span> Refresh briefing';
+    }
+  </script>
+</body>
+</html>
